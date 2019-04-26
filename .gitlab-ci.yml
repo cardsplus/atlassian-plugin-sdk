@@ -1,14 +1,11 @@
-# Beschreibt wie unsere CI/CD Pipeline mit der Gitlab-CI funktioniert
-#
-# Referenz: https://docs.gitlab.com/ce/ci/yaml/
-# Linter: https://gitsc.emundo.eu/ci/lint
-# Doku: https://gitsc.emundo.eu/help/ci/README.md
+# https://docs.gitlab.com/ce/ci/yaml/
+# https://gitsc.emundo.eu/ci/lint
+# https://gitsc.emundo.eu/help/ci/README.md
 
 image: emundo/docker-compose-openjdk-node-gradle:latest
 
 variables:
-  # Deaktiviere den Gradle Daemon: https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:why_the_daemon
-  # Verwende nicht GRADLE_OPTS sondern JAVA_OPTS, sonst wird die JVM nicht mit den Settings gestartet
+  # https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:why_the_daemon
   JAVA_OPTS: "-Xmx4096m -Dorg.gradle.daemon=false"
 
 stages:
@@ -20,7 +17,7 @@ cache:
 
 before_script:
   # Gradle-Ressourcen im job-übergreifenden Cache
-  - export GRADLE_USER_HOME=`pwd`/.gradle
+  - export GRADLE_USER_HOME=${PWD}/.gradle
 
 check:
   stage: build
@@ -41,7 +38,9 @@ build:
     - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest"
     - "export CI_COMMIT_TAG"
 
+    # Login an der Registry für späteres docker push
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
     # Baue und veröffentliche Docker Image
     - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -f Dockerfile .
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"

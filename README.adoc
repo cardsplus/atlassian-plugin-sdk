@@ -1,0 +1,55 @@
+= Docker-Image lokal bauen
+
+Für Windows (Powershell) sieht der Befehl so aus:
+```
+Get-Content Dockerfile | docker build -
+```
+
+Das Ergebnis sieht so aus:
+
+```
+Sending build context to Docker daemon  431.1MB
+Step 1/8 : FROM centos
+ ---> 9f38484d220f
+Step 2/8 : RUN yum install -y java-1.8.0-openjdk
+ ---> Using cache
+ ---> eb6376fa9bcc
+Step 3/8 : ENV JAVA_HOME /etc/alternatives/jre
+ ---> Using cache
+ ---> 08eab6daf5f2
+Step 4/8 : COPY artifactory.repo /etc/yum.repos.d/
+ ---> Using cache
+ ---> 1bde090723ce
+Step 5/8 : RUN yum -y install atlassian-plugin-sdk
+ ---> Using cache
+ ---> 251b451f9e4f
+Step 6/8 : VOLUME /plugin
+ ---> Using cache
+ ---> 51be84658c99
+Step 7/8 : WORKDIR /plugin
+ ---> Using cache
+ ---> 65eee7aca69c
+Step 8/8 : CMD ["atlas-version"]
+ ---> Using cache
+ ---> e36395e3c50b
+Successfully built e36395e3c50b
+```
+
+= Docker-Image lokal ausführen:
+
+Für Windows (Powershell) sieht der Befehl so aus:
+```
+docker run --rm -v ${PWD}:/plugin e36395e3c50b atlas-version
+```
+
+Es kann anstelle von atlas-version natürlich jedes andere
+atlas-Kommando verwendet werden, z.B.
+
+* atlas-run
+* atlas-debug
+* atlas-clean
+* atlas-package
+* atlas-integration-test
+* atlas-help
+
+Siehe https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK[developer.atlassian.com]

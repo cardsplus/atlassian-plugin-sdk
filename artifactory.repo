@@ -1,0 +1,5 @@
+[Artifactory]
+name=artifactory
+baseurl=https://packages.atlassian.com/yum/atlassian-sdk-rpm/
+enabled=1
+gpgcheck=0

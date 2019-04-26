@@ -10,6 +10,7 @@ COPY artifactory.repo /etc/yum.repos.d/
 RUN yum -y install atlassian-plugin-sdk-8.0.7
 
 # Verify that you have set up the SDK correctly.
-VOLUME /plugin
+VOLUME /plugin /m2
+ENV ATLAS_OPTS "-Dmaven.repo.local=/m2/repository"
 WORKDIR /plugin
 CMD ["atlas-version"]

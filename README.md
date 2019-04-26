@@ -1,1 +1,1 @@
-= Atlassian SDK 8.0.7
+# Atlassian Plugin SDK 8.0.7

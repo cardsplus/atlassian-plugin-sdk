@@ -42,6 +42,6 @@ build:
     - "export CI_COMMIT_TAG"
 
     # Baue und veröffentliche Docker Image
-    - docker build -t "$CI_REGISTRY_IMAGE/$CI_COMMIT_TAG" -f Dockerfile $CI_PROJECT_NAME
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -f Dockerfile .
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push "$CI_REGISTRY_IMAGE/$CI_PROJECT_NAME:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"

@@ -9,29 +9,43 @@ Das Ergebnis sieht so aus:
 
 ```
 Sending build context to Docker daemon  431.1MB
-Step 1/8 : FROM centos
+Step 1/12 : FROM centos
  ---> 9f38484d220f
-Step 2/8 : RUN yum install -y java-1.8.0-openjdk
+Step 2/12 : RUN yum install -y java-1.8.0-openjdk-devel
  ---> Using cache
- ---> eb6376fa9bcc
-Step 3/8 : ENV JAVA_HOME /etc/alternatives/jre
+ ---> aea44c5117ba
+Step 3/12 : ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk/
  ---> Using cache
- ---> 08eab6daf5f2
-Step 4/8 : COPY artifactory.repo /etc/yum.repos.d/
+ ---> 02715f728a8b
+Step 4/12 : COPY artifactory.repo /etc/yum.repos.d/
  ---> Using cache
- ---> 1bde090723ce
-Step 5/8 : RUN yum -y install atlassian-plugin-sdk
+ ---> 5579c47dccdf
+Step 5/12 : RUN yum -y install atlassian-plugin-sdk-8.0.7
  ---> Using cache
- ---> 251b451f9e4f
-Step 6/8 : VOLUME /plugin
+ ---> 2a377866518c
+Step 6/12 : VOLUME /plugin /m2
  ---> Using cache
- ---> 51be84658c99
-Step 7/8 : WORKDIR /plugin
+ ---> 36771a2d9041
+Step 7/12 : EXPOSE 1990
  ---> Using cache
- ---> 65eee7aca69c
-Step 8/8 : CMD ["atlas-version"]
+ ---> 012817c6d3ed
+Step 8/12 : EXPOSE 2990
  ---> Using cache
- ---> e36395e3c50b
+ ---> 34eed7e6ed91
+Step 9/12 : COPY entrypoint.sh /
+ ---> 1840dd181a83
+Step 10/12 : RUN chmod +x /entrypoint.sh
+ ---> Running in 32a235430b50
+Removing intermediate container 32a235430b50
+ ---> 283c3cdfe7f9
+Step 11/12 : ENTRYPOINT cd /plugin && /entrypoint.sh $0 $@
+ ---> Running in ea1f5daa87fa
+Removing intermediate container ea1f5daa87fa
+ ---> 880912e4883c
+Step 12/12 : CMD ["atlas-version"]
+ ---> Running in 6cbd05d7100f
+Removing intermediate container 6cbd05d7100f
+ ---> a1bdc842e19b
 Successfully built e36395e3c50b
 ```
 
@@ -39,11 +53,14 @@ Successfully built e36395e3c50b
 
 Für Windows (Powershell) sieht der Befehl so aus:
 ```
-docker run --rm -v ${PWD}:/plugin e36395e3c50b atlas-version
+docker run --rm -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 e36395e3c50b atlas-version
 ```
 
-Es kann anstelle von atlas-version natürlich jedes andere
-atlas-Kommando verwendet werden, z.B.
+Das Volume "/plugin" enthält den Source-Code und vor allem die pom.xml des Plugins.
+
+Das Volume "/m2" ist eine Optimierung für den Build-Prozess und enthält den M2-Cache.
+
+Als Parameter kann neben atlas-version natürlich jedes andere atlas-Kommando verwendet werden, z.B.
 
 * atlas-run
 * atlas-debug

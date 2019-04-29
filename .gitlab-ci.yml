@@ -40,7 +40,7 @@ docker_run:
     - docker run --rm "$CI_PROJECT_NAME" ls /plugin
     - docker run --rm "$CI_PROJECT_NAME" ls /m2
 
-build:
+docker_push:
   stage: build
   only:
     - master
@@ -57,7 +57,7 @@ build:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
 
-test:
+docker_test:
   stage: test
   only:
     - master
@@ -68,5 +68,4 @@ test:
   stage: build
   script:
     # Teste Docker Image
-    - cd cardsplus
     - atlas-version

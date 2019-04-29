@@ -10,6 +10,7 @@ variables:
 
 stages:
   - build
+  - test
 
 cache:
   paths:
@@ -19,14 +20,25 @@ before_script:
   # Gradle-Ressourcen im job-übergreifenden Cache
   - export GRADLE_USER_HOME=${PWD}/.gradle
 
-check:
+docker_build:
   stage: build
   except:
     - master
     - tags
   script:
-    # Baue Docker Image lokal
-    - docker build -f Dockerfile .
+    # Baue Docker Image
+    - docker build -f Dockerfile -t "$CI_PROJECT_NAME" .
+
+docker_run:
+  stage: test
+  except:
+    - master
+    - tags
+  script:
+    - docker run -rm "$CI_PROJECT_NAME"
+    - docker run -rm "$CI_PROJECT_NAME" env
+    - docker run -rm "$CI_PROJECT_NAME" ls /plugin
+    - docker run -rm "$CI_PROJECT_NAME" ls /m2
 
 build:
   stage: build
@@ -38,9 +50,23 @@ build:
     - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest"
     - "export CI_COMMIT_TAG"
 
-    # Login an der Registry für späteres docker push
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-
-    # Baue und veröffentliche Docker Image
+    # Baue Docker Image
     - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -f Dockerfile .
+
+    # Veröffentliche Docker Image in der Registry
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+
+test:
+  stage: test
+  only:
+    - master
+  image:
+    name: $CI_REGISTRY_IMAGE:latest
+    # SDK direkt aufrufen wegen /plugin
+    entrypoint: [""]
+  stage: build
+  script:
+    # Teste Docker Image
+    - cd cardsplus
+    - atlas-version

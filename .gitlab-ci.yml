@@ -61,6 +61,7 @@ docker_test:
   stage: test
   only:
     - master
+    - tags
   image:
     name: $CI_REGISTRY_IMAGE:latest
     # SDK direkt aufrufen wegen /plugin

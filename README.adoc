@@ -1,4 +1,13 @@
-= Docker-Image lokal bauen
+= Projektkonfiguration
+
+== Terminal
+
+```
+git clone https://gitlab.emundo.eu/erd/cardsplus/plugin-sdk.git
+cd plugin-confluence-sdk
+```
+
+=== Docker-Image lokal bauen
 
 Für Windows (Powershell) sieht der Befehl so aus:
 ```
@@ -8,48 +17,58 @@ Get-Content Dockerfile | docker build -
 Das Ergebnis sieht so aus:
 
 ```
-Sending build context to Docker daemon  431.1MB
-Step 1/12 : FROM centos
+Sending build context to Docker daemon  431.2MB
+Step 1/16 : FROM centos
  ---> 9f38484d220f
-Step 2/12 : RUN yum install -y java-1.8.0-openjdk-devel
+Step 2/16 : VOLUME /plugin /m2
  ---> Using cache
- ---> aea44c5117ba
-Step 3/12 : ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk/
+ ---> 2030bba90db5
+Step 3/16 : RUN yum install -y java-1.8.0-openjdk-devel
  ---> Using cache
- ---> 02715f728a8b
-Step 4/12 : COPY artifactory.repo /etc/yum.repos.d/
+ ---> a106de74c0c1
+Step 4/16 : ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk/
  ---> Using cache
- ---> 5579c47dccdf
-Step 5/12 : RUN yum -y install atlassian-plugin-sdk-8.0.7
+ ---> ebdc9b9b7a81
+Step 5/16 : COPY artifactory.repo /etc/yum.repos.d/
  ---> Using cache
- ---> 2a377866518c
-Step 6/12 : VOLUME /plugin /m2
+ ---> 0aa1681a36c0
+Step 6/16 : RUN yum -y install atlassian-plugin-sdk-8.0.7
  ---> Using cache
- ---> 36771a2d9041
-Step 7/12 : EXPOSE 1990
+ ---> bb5be763a20f
+Step 7/16 : ENV ATLAS_HOME="/usr/share/atlassian-plugin-sdk-8.0.7"
  ---> Using cache
- ---> 012817c6d3ed
-Step 8/12 : EXPOSE 2990
+ ---> 3e25a6c3b07e
+Step 8/16 : ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
  ---> Using cache
- ---> 34eed7e6ed91
-Step 9/12 : COPY entrypoint.sh /
- ---> 1840dd181a83
-Step 10/12 : RUN chmod +x /entrypoint.sh
- ---> Running in 32a235430b50
-Removing intermediate container 32a235430b50
- ---> 283c3cdfe7f9
-Step 11/12 : ENTRYPOINT cd /plugin && /entrypoint.sh $0 $@
- ---> Running in ea1f5daa87fa
-Removing intermediate container ea1f5daa87fa
- ---> 880912e4883c
-Step 12/12 : CMD ["atlas-version"]
- ---> Running in 6cbd05d7100f
-Removing intermediate container 6cbd05d7100f
- ---> a1bdc842e19b
+ ---> c84b1100a668
+Step 9/16 : RUN sed -i -e 's/MVN_COMMAND=".*:integration-test"/MVN_COMMAND="integration-test"/g' $ATLAS_HOME/bin/atlas-integration-test
+ ---> Using cache
+ ---> 4371dddd9fcd
+Step 10/16 : EXPOSE 1990
+ ---> Using cache
+ ---> 8786f41a17f2
+Step 11/16 : EXPOSE 2990
+ ---> Using cache
+ ---> 07deba1768fc
+Step 12/16 : EXPOSE 5005
+ ---> Using cache
+ ---> 2f32532ea3ca
+Step 13/16 : COPY entrypoint.sh /
+ ---> Using cache
+ ---> a6078822570e
+Step 14/16 : RUN chmod +x /entrypoint.sh
+ ---> Using cache
+ ---> 99216f26dd32
+Step 15/16 : ENTRYPOINT /entrypoint.sh $0 $@
+ ---> Using cache
+ ---> 3a90d12ff7e8
+Step 16/16 : CMD ["atlas-version"]
+ ---> Using cache
+ ---> e36395e3c50b
 Successfully built e36395e3c50b
 ```
 
-= Docker-Image lokal ausführen:
+=== Docker-Image lokal ausführen:
 
 Für Windows (Powershell) sieht der Befehl so aus:
 ```

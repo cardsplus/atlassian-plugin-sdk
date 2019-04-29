@@ -19,9 +19,6 @@ cache:
 before_script:
   # Gradle-Ressourcen im job-übergreifenden Cache
   - export GRADLE_USER_HOME=${PWD}/.gradle
-  # Bestimme bei Vorhandensein eines Tags oder verwende 'latest'
-  - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest"
-  - "export CI_COMMIT_TAG"
 
 docker_build:
   stage: build
@@ -38,6 +35,10 @@ docker_build_push:
     - master
     - tags
   script:
+    # Bestimme bei Vorhandensein eines Tags oder verwende 'latest'
+    - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest"
+    - "export CI_COMMIT_TAG"
+    
     # Baue Docker Image
     - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -f Dockerfile .
 
@@ -57,9 +58,8 @@ docker_image_run:
   stage: test
   only:
     - master
-    - tags
   image:
-    name: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    name: $CI_REGISTRY_IMAGE:latest
     # SDK direkt aufrufen wegen /plugin
     entrypoint: [""]
   script:

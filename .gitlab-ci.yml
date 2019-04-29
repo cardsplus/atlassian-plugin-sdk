@@ -58,8 +58,6 @@ docker_push:
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
 
 docker_test:
-  dependencies:
-    - docker_push
   stage: test
   only:
     - master

@@ -35,10 +35,10 @@ docker_run:
     - master
     - tags
   script:
-    - docker run -rm "$CI_PROJECT_NAME"
-    - docker run -rm "$CI_PROJECT_NAME" env
-    - docker run -rm "$CI_PROJECT_NAME" ls /plugin
-    - docker run -rm "$CI_PROJECT_NAME" ls /m2
+    - docker run --rm "$CI_PROJECT_NAME"
+    - docker run --rm "$CI_PROJECT_NAME" env
+    - docker run --rm "$CI_PROJECT_NAME" ls /plugin
+    - docker run --rm "$CI_PROJECT_NAME" ls /m2
 
 build:
   stage: build

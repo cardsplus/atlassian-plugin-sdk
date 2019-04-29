@@ -66,7 +66,6 @@ docker_test:
     name: $CI_REGISTRY_IMAGE:latest
     # SDK direkt aufrufen wegen /plugin
     entrypoint: [""]
-  stage: build
   script:
     # Teste Docker Image
     - atlas-version

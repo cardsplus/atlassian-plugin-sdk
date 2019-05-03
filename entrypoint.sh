@@ -25,7 +25,7 @@ atlas-compile)
   ;;
 atlas-debug)
   # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-debug/ 
-  (cd plugin; $@)
+  (cd plugin; $@ --server localhost)
   ;;
 atlas-install-plugin)
   # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-install-plugin/
@@ -49,11 +49,11 @@ atlas-release-rollback)
   ;;
 atlas-run)
   # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run/
-  (cd plugin; $@)
+  (cd plugin; $@ --server localhost)
   ;;
 atlas-run-standalone)
   # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run-standalone/
-  (cd plugin; $@)
+  (cd plugin; $@ --server localhost)
   ;;
 atlas-unit-test)
   # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-unit-test/

@@ -1,21 +1,26 @@
-= Projektkonfiguration
-
-== Terminal
-
+Plugin-SDK-Projekt lokal installieren
 ```
 git clone https://gitlab.emundo.eu/erd/cardsplus/plugin-sdk.git
-cd plugin-confluence-sdk
+cd plugin-sdk
 ```
 
-=== Docker-Image lokal bauen
+NOTE: Das Plugin-SDK kann für alle Produkte von Atlassian verwendet werden.
 
-Für Windows (Powershell) sieht der Befehl so aus:
+Das Plugin-SDK liegt als Installationsmedium für Windows, MacOS und Linux vor.
+
+Windows (Installer)::
+sdk-x.x.x.exe
+MacOS (Installer)::
+sdk-x.x.x.dmg
+Linux::
+sdk-x.x.x.tar.gz
+
+Docker-Image lokal bauen:
 ```
-Get-Content Dockerfile | docker build -
+docker build -t plugin-sdk -f Dockerfile .
 ```
 
 Das Ergebnis sieht so aus:
-
 ```
 Sending build context to Docker daemon  431.2MB
 Step 1/16 : FROM centos
@@ -66,26 +71,27 @@ Step 16/16 : CMD ["atlas-version"]
  ---> Using cache
  ---> e36395e3c50b
 Successfully built e36395e3c50b
+Successfully tagged plugin-sdk:latest
 ```
 
-=== Docker-Image lokal ausführen:
-
-Für Windows (Powershell) sieht der Befehl so aus:
+Docker-Image lokal ausführen:
 ```
-docker run --rm -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 e36395e3c50b atlas-version
+docker run --rm -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 plugin-sdk atlas-version
 ```
 
 Das Volume "/plugin" enthält den Source-Code und vor allem die pom.xml des Plugins.
 
 Das Volume "/m2" ist eine Optimierung für den Build-Prozess und enthält den M2-Cache.
 
-Als Parameter kann neben atlas-version natürlich jedes andere atlas-Kommando verwendet werden, z.B.
+Als Parameter kann neben atlas-version natürlich jedes andere atlas-Kommando aufgerufen werden, z.B.
 
+* atlas-help
+* atlas-create-*
 * atlas-run
 * atlas-debug
 * atlas-clean
 * atlas-package
-* atlas-integration-test
-* atlas-help
+
+Die Parameter werden beim Aufruf an `entrypoint.sh` übergeben und abhängig vom atlas-Kommando ggfs. noch ergänzt.
 
 Siehe https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK[developer.atlassian.com]

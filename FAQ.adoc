@@ -1,0 +1,10 @@
+
+---
+
+```
+atlas-version: /entrypoint.sh: /bin/bash^M: bad interpreter: No such file or directory
+```
+
+Das Problem ist der Zeilenumbruch in der `entrypoint.sh`. Es muss LF sein, nicht CRLF.
+
+---

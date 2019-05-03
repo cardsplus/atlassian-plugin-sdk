@@ -1,0 +1,4 @@
+/*
+ * https://docs.gradle.org/5.3.1/userguide/multi_project_builds.html
+ */
+rootProject.name = 'plugin-sdk'

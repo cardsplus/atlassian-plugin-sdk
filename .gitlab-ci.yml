@@ -52,6 +52,7 @@ docker_run:
     - master
     - tags
   script:
+    # Teste Docker Image
     - docker run --rm "$CI_PROJECT_NAME" atlas-version
 
 docker_image_run:

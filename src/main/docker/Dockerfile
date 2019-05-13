@@ -16,17 +16,9 @@ ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
 # https://community.developer.atlassian.com/t/atlassian-plugin-sdk-8-atlas-integration-test/26927
 RUN sed -i -e 's/MVN_COMMAND=".*:integration-test"/MVN_COMMAND="integration-test"/g' $ATLAS_HOME/bin/atlas-integration-test
 
-# Expose port for confluence
+# Expose ports for apps and remote debugging
 # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run-standalone/
-EXPOSE 1990
-
-# Expose port for jira
-# https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run-standalone/
-EXPOSE 2990
-
-# Expose port for debugger
-# https://developer.atlassian.com/server/framework/atlassian-sdk/creating-a-remote-debug-target/
-EXPOSE 5005
+EXPOSE 1990 2990 5990 5005
 
 # Execute the command in plugin directory.
 COPY entrypoint.sh /

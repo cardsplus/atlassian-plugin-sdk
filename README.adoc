@@ -9,82 +9,86 @@ NOTE: Das Plugin-SDK kann für alle Produkte von Atlassian verwendet werden.
 Das Plugin-SDK liegt als Installationsmedium für Windows, MacOS und Linux vor.
 
 Windows (Installer)::
-sdk-x.x.x.exe
+https://marketplace.atlassian.com/apps/1210950/atlassian-plugin-sdk-windows/version-history
+
 MacOS (Installer)::
-sdk-x.x.x.dmg
-Linux::
-sdk-x.x.x.tar.gz
+
+https://marketplace.atlassian.com/apps/1210951/atlassian-plugin-sdk-mac-os-x/version-history
+
+Linux (DEB)::
+
+https://marketplace.atlassian.com/apps/1210992/atlassian-plugin-sdk-deb/version-history
+
+Linux (RPM)::
+
+https://marketplace.atlassian.com/apps/1210991/atlassian-plugin-sdk-rpm/version-history
+
+Linux (tar.gz)::
+
+https://marketplace.atlassian.com/apps/1210993/atlassian-plugin-sdk-tgz/version-history
 
 Docker-Image lokal bauen:
 ```
-docker build -t plugin-sdk -f Dockerfile .
+docker build -t plugin-sdk:latest src/main/docker
 ```
 
 Das Ergebnis sieht so aus:
 ```
-Sending build context to Docker daemon  431.2MB
-Step 1/16 : FROM centos
- ---> 9f38484d220f
-Step 2/16 : VOLUME /plugin /m2
+Sending build context to Docker daemon  5.632kB
+Step 1/13 : FROM adoptopenjdk/openjdk8:jdk8u212-b03-alpine
+ ---> a42a8e5e080a
+Step 2/13 : ENV ATLAS_VERSION=8.0.7
  ---> Using cache
- ---> 2030bba90db5
-Step 3/16 : RUN yum install -y java-1.8.0-openjdk-devel
+ ---> 4ca7a5bffdd1
+Step 3/13 : ENV ATLAS_HOME="/opt/atlassian-plugin-sdk-${ATLAS_VERSION}"
  ---> Using cache
- ---> a106de74c0c1
-Step 4/16 : ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk/
+ ---> 8e8c5d535429
+Step 4/13 : ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
  ---> Using cache
- ---> ebdc9b9b7a81
-Step 5/16 : COPY artifactory.repo /etc/yum.repos.d/
+ ---> 3daae120e5f2
+Step 5/13 : RUN apk add --no-cache bash curl && curl -jkSL -o /opt/sdk.tar.gz https://maven.atlassian.com/content/repositories/atlassian-public/com/atlassian/amps/atlassian-plugin-sdk/${ATLAS_VERSION}/atlassian-plugin-sdk-${ATLAS_VERSION}.tar.gz && tar -C /opt -xf /opt/sdk.tar.gz && rm /opt/sdk.tar.gz
  ---> Using cache
- ---> 0aa1681a36c0
-Step 6/16 : RUN yum -y install atlassian-plugin-sdk-8.0.7
+ ---> 60a728f0ec88
+Step 6/13 : RUN sed -i -e 's/MVN_COMMAND=".*:integration-test"/MVN_COMMAND="integration-test"/g' ${ATLAS_HOME}/bin/atlas-integration-test
  ---> Using cache
- ---> bb5be763a20f
-Step 7/16 : ENV ATLAS_HOME="/usr/share/atlassian-plugin-sdk-8.0.7"
+ ---> b706fc7cedd2
+Step 7/13 : VOLUME /plugin /m2
  ---> Using cache
- ---> 3e25a6c3b07e
-Step 8/16 : ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
+ ---> 235d690ec44d
+Step 8/13 : EXPOSE 1990 2990 5990 5005
  ---> Using cache
- ---> c84b1100a668
-Step 9/16 : RUN sed -i -e 's/MVN_COMMAND=".*:integration-test"/MVN_COMMAND="integration-test"/g' $ATLAS_HOME/bin/atlas-integration-test
+ ---> 949a605bf223
+Step 9/13 : COPY entrypoint.sh /
  ---> Using cache
- ---> 4371dddd9fcd
-Step 10/16 : EXPOSE 1990
+ ---> ef7d1601f73a
+Step 10/13 : RUN chmod +x /entrypoint.sh
  ---> Using cache
- ---> 8786f41a17f2
-Step 11/16 : EXPOSE 2990
+ ---> 2ad6ab7c4d04
+Step 11/13 : ENTRYPOINT /entrypoint.sh $0 $@
  ---> Using cache
- ---> 07deba1768fc
-Step 12/16 : EXPOSE 5005
+ ---> c51c915b4702
+Step 12/13 : ENV PATH="${ATLAS_HOME}/bin:${PATH}"
  ---> Using cache
- ---> 2f32532ea3ca
-Step 13/16 : COPY entrypoint.sh /
+ ---> 8ba3e32b7402
+Step 13/13 : CMD ["atlas-version"]
  ---> Using cache
- ---> a6078822570e
-Step 14/16 : RUN chmod +x /entrypoint.sh
- ---> Using cache
- ---> 99216f26dd32
-Step 15/16 : ENTRYPOINT /entrypoint.sh $0 $@
- ---> Using cache
- ---> 3a90d12ff7e8
-Step 16/16 : CMD ["atlas-version"]
- ---> Using cache
- ---> e36395e3c50b
-Successfully built e36395e3c50b
+ ---> 24ef35f78620
+Successfully built 24ef35f78620
 Successfully tagged plugin-sdk:latest
 ```
 
 Docker-Image lokal ausführen:
 ```
-docker run --rm -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 plugin-sdk atlas-version
+docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 plugin-sdk /bin/bash
 ```
 
 Das Volume "/plugin" enthält den Source-Code und vor allem die pom.xml des Plugins.
 
 Das Volume "/m2" ist eine Optimierung für den Build-Prozess und enthält den M2-Cache.
 
-Als Parameter kann neben atlas-version natürlich jedes andere atlas-Kommando aufgerufen werden, z.B.
+Als Parameter kann auch ein atlas-Kommando aufgerufen werden, z.B.
 
+* atlas-version
 * atlas-help
 * atlas-create-*
 * atlas-run

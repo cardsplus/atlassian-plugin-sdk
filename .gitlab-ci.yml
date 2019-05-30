@@ -10,7 +10,9 @@ variables:
 
 stages:
   - build
-  - test
+  - docker_push
+  - docker_run
+  - publish
 
 cache:
   paths:
@@ -20,49 +22,44 @@ before_script:
   # Gradle-Ressourcen im job-übergreifenden Cache
   - export GRADLE_USER_HOME=${PWD}/.gradle
 
-docker_build:
+build:
   stage: build
+  script:
+    - gradle build --info
+  artifacts:
+    expire_in: 1 hour
+    name: "$CI_PROJECT_PATH_SLUG-snapshot"
+    paths:
+      - build/docker
+
+docker_push_dev:
+  stage: docker_push
   except:
     - master
     - tags
   script:
-    # Baue Docker Image
-    - docker build -t "$CI_PROJECT_NAME" src/main/docker
-
-docker_build_push:
-  stage: build
-  only:
-    - master
-    - tags
-  script:
-    # Bestimme bei Vorhandensein eines Tags oder verwende 'latest'
-    - "[[ -z $CI_COMMIT_TAG ]] && CI_COMMIT_TAG=latest"
-    - "export CI_COMMIT_TAG"
-    
-    # Baue Docker Image
-    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" src/main/docker
-
-    # Veröffentliche Docker Image in der Registry
+    - docker build -t "$CI_REGISTRY_IMAGE:snapshot" build/docker
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE:snapshot"
 
-docker_run:
-  stage: test
+docker_run_dev:
+  image:
+    name: $CI_REGISTRY_IMAGE:snapshot
+    entrypoint: [""]
+  stage: docker_run
   except:
     - master
     - tags
   script:
-    # Teste Docker Image
-    - docker run --rm "$CI_PROJECT_NAME" atlas-version
+    - atlas-version
 
-docker_image_run:
-  stage: test
+publish:
+  stage: publish
   only:
     - master
-  image:
-    name: $CI_REGISTRY_IMAGE:latest
-    # SDK direkt aufrufen wegen /plugin
-    entrypoint: [""]
+    - tags
   script:
-    # Teste Docker Image
-    - atlas-version
+    - test -z $CI_COMMIT_TAG && tag=latest || tag=$CI_COMMIT_TAG
+    - docker build -t "$CI_REGISTRY_IMAGE:$tag" build/docker
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker push "$CI_REGISTRY_IMAGE:$tag"

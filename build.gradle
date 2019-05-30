@@ -30,16 +30,40 @@ println '###############################################'
 println 'PLUGIN_SDK_TAG=' + "${PLUGIN_SDK_TAG}"
 println ''
 
-task clean(type: Exec) {
-    commandLine 'docker', 'images', 'purge'
+task clean {
+    doFirst {
+        delete "${buildDir}"
+    }
 }
 
-task build(type: Exec) {
-    commandLine 'docker', 'build', '-t', "${PLUGIN_SDK_TAG}", 'src/main/docker'
+import org.apache.tools.ant.filters.*;
+
+task build {
+    doFirst {
+        mkdir "${buildDir}/docker"
+    }
+    doLast {
+        copy {
+            from "src/main/docker"
+            include "*"
+            into "${buildDir}/docker"
+            filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("lf"))
+        }
+    }
 }
 build.mustRunAfter clean
 
-task check(type: Exec) {
-    commandLine 'docker', 'run', '--rm', "${PLUGIN_SDK_TAG}"
+task check {
+    dependsOn(build)
+    doLast {
+        exec {
+            commandLine 'docker', 'build', '-t', "${PLUGIN_SDK_TAG}", 'build/docker'
+        }
+    }
+    doLast {
+        exec {
+            commandLine 'docker', 'run', '--rm', "${PLUGIN_SDK_TAG}"
+        }
+    }
 }
-check.mustRunAfter build
+check.mustRunAfter clean

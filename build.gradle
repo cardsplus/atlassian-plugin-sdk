@@ -47,6 +47,7 @@ task build {
             from "src/main/docker"
             include "*"
             into "${buildDir}/docker"
+            // CRLF causes `/entrypoint.sh: not found`
             filter(FixCrLfFilter, eol:FixCrLfFilter.CrLf.newInstance("lf"))
         }
     }

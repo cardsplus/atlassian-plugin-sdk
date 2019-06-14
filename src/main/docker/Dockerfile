@@ -20,9 +20,9 @@ VOLUME /plugin /m2
 # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-run-standalone/
 EXPOSE 1990 2990 5990 5005
 
-# Execute the command in plugin directory.
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
+# Define entrypoint.
+COPY entrypoint*.sh /
+RUN chmod +x /entrypoint*.sh
 ENTRYPOINT /entrypoint.sh $0 $@
 
 # Define default command.

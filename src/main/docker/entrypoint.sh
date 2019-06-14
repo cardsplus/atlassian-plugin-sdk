@@ -63,7 +63,11 @@ atlas-update)
   # https://developer.atlassian.com/server/framework/atlassian-sdk/atlas-update/
   (cd plugin; $@)
   ;;
+shell)
+  shift
+  /bin/bash $@
+  ;;
 *)
-  $@
+  false
   ;;
 esac

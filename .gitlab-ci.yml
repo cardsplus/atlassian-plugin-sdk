@@ -51,7 +51,7 @@ docker_run_dev:
     - master
     - tags
   script:
-    - atlas-version
+    - /entrypoint-test.sh
 
 publish:
   stage: publish

@@ -4,27 +4,23 @@ git clone https://gitlab.emundo.eu/erd/cardsplus/plugin-sdk.git
 cd plugin-sdk
 ```
 
-NOTE: Das Plugin-SDK kann für alle Produkte von Atlassian verwendet werden.
+Das https://developer.atlassian.com/server/framework/atlassian-sdk/[Plugin-SDK] kann für alle Produkte von Atlassian verwendet werden.
 
-Das Plugin-SDK liegt als Installationsmedium für Windows, MacOS und Linux vor.
+Das https://developer.atlassian.com/server/framework/atlassian-sdk/[Plugin-SDK] liegt als Installationsmedium für Windows, MacOS und Linux vor.
 
 Windows (Installer)::
 https://marketplace.atlassian.com/apps/1210950/atlassian-plugin-sdk-windows/version-history
 
 MacOS (Installer)::
-
 https://marketplace.atlassian.com/apps/1210951/atlassian-plugin-sdk-mac-os-x/version-history
 
 Linux (DEB)::
-
 https://marketplace.atlassian.com/apps/1210992/atlassian-plugin-sdk-deb/version-history
 
 Linux (RPM)::
-
 https://marketplace.atlassian.com/apps/1210991/atlassian-plugin-sdk-rpm/version-history
 
 Linux (tar.gz)::
-
 https://marketplace.atlassian.com/apps/1210993/atlassian-plugin-sdk-tgz/version-history
 
 Docker-Image lokal bauen:
@@ -34,52 +30,21 @@ docker build -t plugin-sdk:latest src/main/docker
 
 Das Ergebnis sieht so aus:
 ```
-Sending build context to Docker daemon  5.632kB
-Step 1/13 : FROM adoptopenjdk/openjdk8:jdk8u212-b03-alpine
- ---> a42a8e5e080a
-Step 2/13 : ENV ATLAS_VERSION=8.0.7
- ---> Using cache
- ---> 4ca7a5bffdd1
-Step 3/13 : ENV ATLAS_HOME="/opt/atlassian-plugin-sdk-${ATLAS_VERSION}"
- ---> Using cache
- ---> 8e8c5d535429
-Step 4/13 : ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
- ---> Using cache
- ---> 3daae120e5f2
-Step 5/13 : RUN apk add --no-cache bash curl && curl -jkSL -o /opt/sdk.tar.gz https://maven.atlassian.com/content/repositories/atlassian-public/com/atlassian/amps/atlassian-plugin-sdk/${ATLAS_VERSION}/atlassian-plugin-sdk-${ATLAS_VERSION}.tar.gz && tar -C /opt -xf /opt/sdk.tar.gz && rm /opt/sdk.tar.gz
- ---> Using cache
- ---> 60a728f0ec88
-Step 6/13 : RUN sed -i -e 's/MVN_COMMAND=".*:integration-test"/MVN_COMMAND="integration-test"/g' ${ATLAS_HOME}/bin/atlas-integration-test
- ---> Using cache
- ---> b706fc7cedd2
-Step 7/13 : VOLUME /plugin /m2
- ---> Using cache
- ---> 235d690ec44d
-Step 8/13 : EXPOSE 1990 2990 5990 5005
- ---> Using cache
- ---> 949a605bf223
-Step 9/13 : COPY entrypoint.sh /
- ---> Using cache
- ---> ef7d1601f73a
-Step 10/13 : RUN chmod +x /entrypoint.sh
- ---> Using cache
- ---> 2ad6ab7c4d04
-Step 11/13 : ENTRYPOINT /entrypoint.sh $0 $@
- ---> Using cache
- ---> c51c915b4702
-Step 12/13 : ENV PATH="${ATLAS_HOME}/bin:${PATH}"
- ---> Using cache
- ---> 8ba3e32b7402
-Step 13/13 : CMD ["atlas-version"]
- ---> Using cache
- ---> 24ef35f78620
-Successfully built 24ef35f78620
+Step 1/17 : FROM adoptopenjdk/openjdk8:jdk8u212-b03-alpine
+
+u.v.m.
+
+Step 17/17 : CMD ["atlas-version"]
+ ---> Running in e1c2e70eb541
+Removing intermediate container e1c2e70eb541
+ ---> 7c2467b8aca9
+Successfully built 7c2467b8aca9
 Successfully tagged plugin-sdk:latest
 ```
 
-Docker-Image lokal ausführen:
+Docker-Image lokal mit Kommandozeile ausführen:
 ```
-docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 plugin-sdk /bin/bash
+docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 -w /plugin plugin-sdk shell
 ```
 
 Das Volume "/plugin" enthält den Source-Code und vor allem die pom.xml des Plugins.
@@ -98,4 +63,7 @@ Als Parameter kann auch ein atlas-Kommando aufgerufen werden, z.B.
 
 Die Parameter werden beim Aufruf an `entrypoint.sh` übergeben und abhängig vom atlas-Kommando ggfs. noch ergänzt.
 
-Siehe https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK[developer.atlassian.com]
+Docker-Image für den Start von Confluence verwenden:
+```
+docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 -p 1990:1990 plugin-sdk atlas-run
+```

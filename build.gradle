@@ -7,12 +7,6 @@ buildscript {
         /* Docker-Image mit Atlassian Plugin SDK */
         PLUGIN_SDK_TAG = 'plugin-sdk:latest'
     }
-
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2"
-        }
-    }
 }
 
 plugins {
@@ -20,15 +14,8 @@ plugins {
     id 'base'
 }
 
-description = 'Atlassian Plugin-SDK'
+description = 'atlassian plugin SDK'
 version = gitVersion();
-
-println ''
-println '###############################################'
-println "# ${description} ${version}"
-println '###############################################'
-println 'PLUGIN_SDK_TAG=' + "${PLUGIN_SDK_TAG}"
-println ''
 
 import org.apache.tools.ant.filters.*;
 

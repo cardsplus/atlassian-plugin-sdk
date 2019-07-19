@@ -19,7 +19,7 @@ version = gitVersion();
 
 import org.apache.tools.ant.filters.*;
 
-task assembleDockerfile(type: Copy) {
+task assembleDocker(type: Copy) {
     assemble.dependsOn it
     from 'src/main/docker'
     include "Dockerfile"
@@ -30,7 +30,8 @@ task assembleDockerfile(type: Copy) {
 }
 
 task image {
-    mustRunAfter clean
+    mustRunAfter clean    
+    dependsOn assemble
     doLast {
         exec {
             commandLine 'docker', 'build', '-t', "${PLUGIN_SDK_TAG}", "${buildDir}/docker"

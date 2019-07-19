@@ -2,7 +2,7 @@ FROM adoptopenjdk/openjdk8:jdk8u212-b03-alpine
 
 # Install the Atlassian SDK.
 # https://developer.atlassian.com/server/framework/atlassian-sdk/install-the-atlassian-sdk-on-a-linux-or-mac-system/
-ENV ATLAS_VERSION=8.0.7
+ENV ATLAS_VERSION=8.0.16
 ENV ATLAS_HOME="/opt/atlassian-plugin-sdk-${ATLAS_VERSION}"
 ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
 RUN apk add --no-cache bash curl && \
@@ -10,8 +10,19 @@ RUN apk add --no-cache bash curl && \
          https://maven.atlassian.com/content/repositories/atlassian-public/com/atlassian/amps/atlassian-plugin-sdk/${ATLAS_VERSION}/atlassian-plugin-sdk-${ATLAS_VERSION}.tar.gz && \
          tar -C /opt -xf /opt/sdk.tar.gz && \
          rm /opt/sdk.tar.gz
-# https://community.developer.atlassian.com/t/atlassian-plugin-sdk-8-atlas-integration-test/26927
-RUN sed -i -e 's/MVN_COMMAND=".*:integration-test"/MVN_COMMAND="integration-test"/g' ${ATLAS_HOME}/bin/atlas-integration-test
+
+# https://github.com/AdoptOpenJDK/openjdk-docker/issues/75
+RUN apk add --no-cache fontconfig
+RUN ln -s /usr/lib/libfontconfig.so.1 /usr/lib/libfontconfig.so && \
+    ln -s /lib/libuuid.so.1 /usr/lib/libuuid.so.1 && \
+    ln -s /lib/libc.musl-x86_64.so.1 /usr/lib/libc.musl-x86_64.so.1
+ENV LD_LIBRARY_PATH /usr/lib
+RUN mkdir /usr/share/fonts
+
+# Install google font.
+RUN curl https://fonts.google.com/download?family=Roboto -L -o roboto.zip && \
+    unzip roboto.zip -d /usr/share/fonts && \
+    rm roboto.zip
 
 # Define volumes for sources and cache.
 VOLUME /plugin /m2

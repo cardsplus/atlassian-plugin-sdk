@@ -2,7 +2,7 @@ FROM adoptopenjdk/openjdk8:jdk8u212-b03-alpine
 
 # Install the Atlassian SDK.
 # https://developer.atlassian.com/server/framework/atlassian-sdk/install-the-atlassian-sdk-on-a-linux-or-mac-system/
-ENV ATLAS_VERSION=8.0.16
+ENV ATLAS_VERSION=8.2.6
 ENV ATLAS_HOME="/opt/atlassian-plugin-sdk-${ATLAS_VERSION}"
 ENV ATLAS_OPTS="-Dmaven.repo.local=/m2/repository"
 RUN apk add --no-cache bash curl && \

@@ -2,62 +2,62 @@
 # https://gitsc.emundo.eu/ci/lint
 # https://gitsc.emundo.eu/help/ci/README.md
 
-image: emundo/docker-compose-openjdk-node-gradle:openjdk-8-gradle-5.4
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_TAG
+
+default:
+  image: eu.gcr.io/emundo-gke-test/emundo/docker-compose-openjdk-node-gradle:openjdk-8-gradle-5.6
+  cache:
+    paths:
+      - .gradle
+  interruptible: true
 
 variables:
   # https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:why_the_daemon
   JAVA_OPTS: "-Xmx4096m -Dorg.gradle.daemon=false"
+  # https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_environment_variables
+  GRADLE_USER_HOME: ${CI_PROJECT_DIR}/.gradle
 
 stages:
   - build
-  - docker_push
-  - docker_run
+  - check
+  - smoke
   - publish
-
-cache:
-  paths:
-    - .gradle
-
-before_script:
-  # Gradle-Ressourcen im job-übergreifenden Cache
-  - export GRADLE_USER_HOME=${PWD}/.gradle
 
 build:
   stage: build
   script:
-    - gradle build --info
+    - gradle build
   artifacts:
-    expire_in: 1 hour
-    name: "$CI_PROJECT_PATH_SLUG-snapshot"
     paths:
       - build/docker
 
-docker_push_dev:
-  stage: docker_push
-  except:
-    - master
-    - tags
+dev:docker_push:
+  stage: check
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
   script:
-    - docker build -t "$CI_REGISTRY_IMAGE:snapshot" build/docker
+    - docker build -t "$CI_REGISTRY_IMAGE:${CI_COMMIT_SHORT_SHA}" build/docker
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push "$CI_REGISTRY_IMAGE:snapshot"
+    - docker push "$CI_REGISTRY_IMAGE:${CI_COMMIT_SHORT_SHA}"
 
-docker_run_dev:
+dev:docker_test:
   image:
-    name: $CI_REGISTRY_IMAGE:snapshot
+    name: $CI_REGISTRY_IMAGE:${CI_COMMIT_SHORT_SHA}
     entrypoint: [""]
-  stage: docker_run
-  except:
-    - master
-    - tags
+  stage: smoke
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
   script:
     - /entrypoint-test.sh
 
-publish:
+tag:publish:
   stage: publish
-  only:
-    - master
-    - tags
+  rules:
+    - if: $CI_COMMIT_TAG
   script:
     - test -z $CI_COMMIT_TAG && tag=latest || tag=$CI_COMMIT_TAG
     - docker build -t "$CI_REGISTRY_IMAGE:$tag" build/docker

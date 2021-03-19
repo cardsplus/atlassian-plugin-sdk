@@ -10,8 +10,8 @@ buildscript {
 }
 
 plugins {
-    id 'com.palantir.git-version' version '0.12.3'
     id 'base'
+    id 'com.palantir.git-version' version '0.12.3'
 }
 
 description = 'atlassian plugin SDK'
@@ -43,11 +43,8 @@ task smoke {
     mustRunAfter clean
     dependsOn image
     doLast {
-        /* check icon file generation. */
-        delete "${buildDir}/1"
-        mkdir "${buildDir}/1"
         exec {
-            commandLine 'docker', 'run', '--rm', '--entrypoint', '/entrypoint-test.sh', "${PLUGIN_SDK_TAG}"
+            commandLine 'docker', 'run', '--rm', '--entrypoint', '/entrypoint.sh', "${PLUGIN_SDK_TAG}", "atlas-version"
         }
     }
 }

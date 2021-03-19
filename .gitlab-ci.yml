@@ -1,4 +1,5 @@
-# https://docs.gitlab.com/ce/ci/yaml/
+# https://docs.gitlab.com/ee/ci/yaml/
+# https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 # https://gitsc.emundo.eu/ci/lint
 # https://gitsc.emundo.eu/help/ci/README.md
 
@@ -9,25 +10,37 @@ workflow:
     - if: $CI_COMMIT_TAG
 
 default:
-  image: eu.gcr.io/emundo-gke-test/emundo/docker-compose-openjdk-node-gradle:openjdk-8-gradle-5.6
+  image: eu.gcr.io/emundo-gke-test/emundo/docker-compose-openjdk-node-gradle:openjdk-11-gradle-6
   cache:
     paths:
       - .gradle
   interruptible: true
 
 variables:
+  # https://docs.gitlab.com/ee/ci/large_repositories/
+  GIT_DEPTH: 10
+  # https://docs.gradle.org/current/userguide/build_cache.html
   # https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:why_the_daemon
-  JAVA_OPTS: "-Xmx4096m -Dorg.gradle.daemon=false"
+  JAVA_OPTS: "-Xmx4096m -Dorg.gradle.caching=true -Dorg.gradle.daemon=false"
   # https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_environment_variables
   GRADLE_USER_HOME: ${CI_PROJECT_DIR}/.gradle
 
 stages:
   - build
-  - check
+  - image
   - smoke
-  - publish
 
-build:
+.job:
+  retry:
+    max: 2
+    when:
+      - unknown_failure
+      - api_failure
+      - runner_system_failure
+      - job_execution_timeout
+      - stuck_or_timeout_failure
+
+.build:
   stage: build
   script:
     - gradle build
@@ -35,31 +48,72 @@ build:
     paths:
       - build/docker
 
-dev:docker_push:
-  stage: check
+dev:build:
+  extends:
+    - .job
+    - .build
   rules:
     - if: $CI_MERGE_REQUEST_ID
-  script:
-    - docker build -t "$CI_REGISTRY_IMAGE:${CI_COMMIT_SHORT_SHA}" build/docker
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push "$CI_REGISTRY_IMAGE:${CI_COMMIT_SHORT_SHA}"
-
-dev:docker_test:
+      
+.image:
+  stage: image
   image:
-    name: $CI_REGISTRY_IMAGE:${CI_COMMIT_SHORT_SHA}
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - test -z "${IMAGE_NAME}" && exit 1
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"username\":\"${CI_REGISTRY_USER}\",\"password\":\"${CI_REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context build/docker --dockerfile build/docker/Dockerfile --destination ${IMAGE_NAME}
+
+dev:image:
+  extends:
+    - .job
+    - .image
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  rules:
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TITLE !~ /^WIP:/
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual      
+      allow_failure: true
+
+tag:image:
+  extends:
+    - .job
+    - .image
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  rules:
+    - if: $CI_COMMIT_TAG
+
+.smoke:
+  image:
+    name: ${IMAGE_NAME}
     entrypoint: [""]
   stage: smoke
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
-    - /entrypoint-test.sh
+    - /entrypoint.sh atlas-version
 
-tag:publish:
-  stage: publish
+dev:smoke:
+  extends:
+    - .job
+    - .smoke
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  rules:
+    - if: $CI_MERGE_REQUEST_ID && $CI_MERGE_REQUEST_TITLE !~ /^WIP:/
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual      
+      allow_failure: true
+
+tag:smoke:
+  extends:
+    - .job
+    - .smoke
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   rules:
     - if: $CI_COMMIT_TAG
-  script:
-    - test -z $CI_COMMIT_TAG && tag=latest || tag=$CI_COMMIT_TAG
-    - docker build -t "$CI_REGISTRY_IMAGE:$tag" build/docker
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker push "$CI_REGISTRY_IMAGE:$tag"

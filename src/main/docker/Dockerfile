@@ -32,8 +32,8 @@ VOLUME /plugin /m2
 EXPOSE 1990 2990 5990 5005
 
 # Define entrypoint.
-COPY entrypoint*.sh /
-RUN chmod +x /entrypoint*.sh
+COPY entrypoint.sh /
+RUN chmod 777 /entrypoint.sh
 ENTRYPOINT /entrypoint.sh $0 $@
 
 # Define default command.

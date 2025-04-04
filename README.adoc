@@ -1,12 +1,12 @@
-Plugin-SDK-Projekt lokal installieren
+Atlassian Plugin-SDK lokal installieren
 ```
-git clone https://gitlab.emundo.eu/erd/cardsplus/plugin-sdk.git
-cd plugin-sdk
+git clone https://gitlab.emundo.eu/erd/cardsplus/atlassian-plugin-sdk.git
+cd atlassian-plugin-sdk
 ```
 
-Das https://developer.atlassian.com/server/framework/atlassian-sdk/[Plugin-SDK] kann für alle Produkte von Atlassian verwendet werden.
+Das https://developer.atlassian.com/server/framework/atlassian-sdk/[Atlassian Plugin-SDK] kann für alle Produkte von Atlassian verwendet werden.
 
-Das https://developer.atlassian.com/server/framework/atlassian-sdk/[Plugin-SDK] liegt als Installationsmedium für Windows, MacOS und Linux vor.
+Das https://developer.atlassian.com/server/framework/atlassian-sdk/[Atlassian Plugin-SDK] liegt als Installationsmedium für Windows, MacOS und Linux vor.
 
 Windows (Installer)::
 https://marketplace.atlassian.com/apps/1210950/atlassian-plugin-sdk-windows/version-history
@@ -25,7 +25,7 @@ https://marketplace.atlassian.com/apps/1210993/atlassian-plugin-sdk-tgz/version-
 
 Docker-Image lokal bauen:
 ```
-docker build -t plugin-sdk:latest src/main/docker
+docker build -t atlassian-plugin-sdk:latest src/main/docker
 ```
 
 Das Ergebnis sieht so aus:
@@ -39,12 +39,12 @@ Step 17/17 : CMD ["atlas-version"]
 Removing intermediate container e1c2e70eb541
  ---> 7c2467b8aca9
 Successfully built 7c2467b8aca9
-Successfully tagged plugin-sdk:latest
+Successfully tagged atlassian-plugin-sdk:latest
 ```
 
 Docker-Image lokal mit Kommandozeile ausführen:
 ```
-docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 -w /plugin plugin-sdk shell
+docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 -w /plugin atlassian-plugin-sdk shell
 ```
 
 Das Volume "/plugin" enthält den Source-Code und vor allem die pom.xml des Plugins.
@@ -65,5 +65,5 @@ Die Parameter werden beim Aufruf an `entrypoint.sh` übergeben und abhängig vom
 
 Docker-Image für den Start von Confluence verwenden:
 ```
-docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 -p 1990:1990 plugin-sdk atlas-run
+docker run --rm -it -v ${PWD}:/plugin -v ${HOME}/.m2:/m2 -p 1990:1990 atlassian-plugin-sdk atlas-run
 ```

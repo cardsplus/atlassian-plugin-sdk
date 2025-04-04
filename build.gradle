@@ -5,16 +5,16 @@
 buildscript {
     ext {
         /* Docker-Image mit Atlassian Plugin SDK */
-        PLUGIN_SDK_TAG = 'plugin-sdk:latest'
+        PLUGIN_SDK_TAG = 'atlassian-plugin-sdk:latest'
     }
 }
 
 plugins {
     id 'base'
-    id 'com.palantir.git-version' version '0.12.3'
+    id 'com.palantir.git-version' version '3.2.0'
 }
 
-description = 'atlassian plugin SDK'
+description = 'Atlassian plugin SDK'
 version = gitVersion();
 
 import org.apache.tools.ant.filters.*;
